@@ -28,24 +28,9 @@
       padding: 28px 16px 60px;
     }
 
-    header {
-      text-align: center;
-      max-width: 560px;
-      margin-bottom: 22px;
-    }
-
-    h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.5rem;
-      color: var(--green);
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      font-size: 0.95rem;
-      color: #555;
-      line-height: 1.5;
-    }
+    header { text-align: center; max-width: 560px; margin-bottom: 22px; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: var(--green); margin-bottom: 6px; }
+    .subtitle { font-size: 0.95rem; color: #555; line-height: 1.5; }
 
     .countdown-box {
       background: var(--green);
@@ -60,20 +45,8 @@
       max-width: 580px;
     }
 
-    .countdown-label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--gold);
-      margin-bottom: 6px;
-    }
-
-    .countdown-timer {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    .countdown-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); margin-bottom: 6px; }
+    .countdown-timer { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 700; letter-spacing: 1px; }
 
     .grid {
       display: grid;
@@ -83,9 +56,7 @@
       max-width: 660px;
     }
 
-    @media (min-width: 600px) {
-      .grid { grid-template-columns: repeat(6, 1fr); }
-    }
+    @media (min-width: 600px) { .grid { grid-template-columns: repeat(6, 1fr); } }
 
     .tile {
       aspect-ratio: 1 / 1;
@@ -97,63 +68,17 @@
       position: relative;
       overflow: hidden;
       user-select: none;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      transition: transform 0.25s ease;
     }
 
-    .tile.locked {
-      background: var(--green);
-      color: rgba(255, 255, 255, 0.4);
-      cursor: not-allowed;
-    }
+    .tile.locked { background: var(--green); color: rgba(255, 255, 255, 0.4); cursor: not-allowed; }
+    .tile.unlocked { background: var(--red); color: var(--text-light); border: 2px solid var(--gold); cursor: pointer; animation: pulse 2s infinite; }
+    .tile.unlocked:hover, .tile.opened:hover { transform: scale(1.05); }
+    .tile.opened { cursor: pointer; border: 2px solid var(--gold); background-size: cover; background-position: center; color: #fff; }
+    .tile.opened::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.28); }
 
-    .tile.unlocked {
-      background: var(--red);
-      color: var(--text-light);
-      border: 2px solid var(--gold);
-      cursor: pointer;
-      animation: pulse 2s infinite;
-    }
-
-    .tile.unlocked:hover {
-      transform: scale(1.05);
-    }
-
-    .tile.opened {
-      cursor: pointer;
-      border: 2px solid var(--gold);
-      background-size: cover;
-      background-position: center;
-      color: #fff;
-    }
-
-    .tile.opened::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.28);
-    }
-
-    .tile.opened:hover {
-      transform: scale(1.05);
-    }
-
-    .tile-num {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.75rem;
-      font-weight: 700;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    }
-
-    .tile-sub {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-top: 2px;
-      position: relative;
-      z-index: 1;
-    }
+    .tile-num { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 700; position: relative; z-index: 1; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    .tile-sub { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; position: relative; z-index: 1; }
 
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.55); }
@@ -161,79 +86,50 @@
       100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
     }
 
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.72);
+    /* Admin Upload Panel (Only visible with ?admin=true) */
+    .admin-panel {
       display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 100;
+      width: 100%;
+      max-width: 580px;
+      background: #fff;
+      border: 2px solid var(--green);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 28px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
     }
+    .admin-panel.visible { display: block; }
+    .admin-panel h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--green); margin-bottom: 12px; }
+    .admin-field { margin-bottom: 12px; }
+    .admin-field label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px; color: #333; }
+    .admin-field input, .admin-field select, .admin-field textarea {
+      width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.92rem;
+    }
+    .admin-btn {
+      background: var(--green); color: #fff; border: none; padding: 12px; border-radius: 8px;
+      width: 100%; font-weight: 600; cursor: pointer; font-size: 0.95rem;
+    }
+    .admin-btn:disabled { opacity: 0.6; cursor: wait; }
+    .admin-status { margin-top: 10px; font-size: 0.85rem; font-weight: 500; text-align: center; }
 
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72);
+      display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100;
+    }
     .modal-backdrop.active { display: flex; }
-
     .modal {
-      background: var(--bg);
-      max-width: 460px;
-      width: 100%;
-      border-radius: 18px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 24px 48px rgba(0,0,0,0.3);
-      border: 2px solid var(--gold);
-      animation: popIn 0.25s ease;
+      background: var(--bg); max-width: 460px; width: 100%; border-radius: 18px; overflow: hidden;
+      position: relative; box-shadow: 0 24px 48px rgba(0,0,0,0.3); border: 2px solid var(--gold);
     }
-
-    @keyframes popIn {
-      from { transform: scale(0.94); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
     .close-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.55);
-      color: #fff;
-      border: none;
-      font-size: 1.3rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
+      position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55); color: #fff; border: none; font-size: 1.3rem; cursor: pointer; z-index: 2;
     }
-
-    .modal-photo {
-      width: 100%;
-      max-height: 380px;
-      object-fit: cover;
-      display: block;
-      background: #e9e4db;
-    }
-
-    .modal-body {
-      padding: 22px 24px 26px;
-      text-align: center;
-    }
-
-    .modal-date {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.75rem;
-      color: var(--red);
-      margin-bottom: 10px;
-    }
-
-    .modal-text {
-      font-size: 1rem;
-      line-height: 1.65;
-      color: #2b2b2b;
-    }
+    .modal-photo { width: 100%; max-height: 380px; object-fit: cover; display: block; background: #e9e4db; }
+    .modal-body { padding: 22px 24px 26px; text-align: center; }
+    .modal-date { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; color: var(--red); margin-bottom: 10px; }
+    .modal-text { font-size: 1rem; line-height: 1.65; color: #2b2b2b; }
   </style>
 </head>
 <body>
@@ -242,6 +138,29 @@
     <h1>31 jours avant le 31 décembre</h1>
     <p class="subtitle">Un nouveau souvenir se débloque chaque jour à minuit (heure du Vietnam) jusqu'à nos retrouvailles.</p>
   </header>
+
+  <!-- Secret Admin Uploader (?admin=true) -->
+  <div class="admin-panel" id="admin-panel">
+    <h3>Mode Admin — Ajouter une photo</h3>
+    <div class="admin-field">
+      <label>Mot de passe (Token GitHub)</label>
+      <input type="password" id="gh-token" placeholder="Colle ton token github_pat_..." />
+    </div>
+    <div class="admin-field">
+      <label>Choisir le jour (1 à 31)</label>
+      <select id="admin-day"></select>
+    </div>
+    <div class="admin-field">
+      <label>Choisir la photo</label>
+      <input type="file" id="admin-file" accept="image/*" />
+    </div>
+    <div class="admin-field">
+      <label>Petit mot en français</label>
+      <textarea id="admin-text" rows="3" placeholder="Écris ton message ici..."></textarea>
+    </div>
+    <button class="admin-btn" id="admin-submit" onclick="uploadToGitHub()">Publier sur le site</button>
+    <div class="admin-status" id="admin-status"></div>
+  </div>
 
   <div class="countdown-box">
     <div class="countdown-label" id="countdown-label">Chargement de l'heure du Vietnam...</div>
@@ -266,10 +185,159 @@
   <script>
     const TARGET_YEAR = 2026;
     const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
-    const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true';
+    const params = new URLSearchParams(window.location.search);
+    const isPreview = params.get('preview') === 'true';
+    const isAdmin = params.get('admin') === 'true';
 
     let openedDays = JSON.parse(localStorage.getItem('opened_days_2026') || '[]');
 
+    // =========================================================================
+    // ADMIN UPLOADER LOGIC (Automatic GitHub Repo Detection)
+    // =========================================================================
+    if (isAdmin) {
+      document.getElementById('admin-panel').classList.add('visible');
+      const savedToken = localStorage.getItem('gh_advent_token');
+      if (savedToken) document.getElementById('gh-token').value = savedToken;
+
+      const daySelect = document.getElementById('admin-day');
+      for (let i = 1; i <= 31; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i === 1 ? '1er décembre' : `${i} décembre`;
+        daySelect.appendChild(opt);
+      }
+      daySelect.addEventListener('change', prefillAdminText);
+      setTimeout(prefillAdminText, 200);
+    }
+
+    function prefillAdminText() {
+      const day = Number(document.getElementById('admin-day').value);
+      const found = (typeof ADVENT_DAYS !== 'undefined') && ADVENT_DAYS.find(d => d.day === day);
+      document.getElementById('admin-text').value = found ? found.text : '';
+    }
+
+    function getRepoInfo() {
+      // Automatically detects username and repo name from username.github.io/repo-name/
+      const owner = window.location.hostname.split('.')[0];
+      const repo = window.location.pathname.split('/').filter(Boolean)[0];
+      return { owner, repo };
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function ghRequest(path, token, options = {}) {
+      const res = await fetch(`https://api.github.com${path}`, {
+        ...options,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
+        }
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Erreur GitHub (${res.status})`);
+      }
+      return res.json();
+    }
+
+    async function uploadToGitHub() {
+      const statusEl = document.getElementById('admin-status');
+      const btn = document.getElementById('admin-submit');
+      const token = document.getElementById('gh-token').value.trim();
+      const day = Number(document.getElementById('admin-day').value);
+      const fileInput = document.getElementById('admin-file');
+      const text = document.getElementById('admin-text').value.trim();
+
+      if (!token) return alert("Entre ton mot de passe (Token GitHub) !");
+      localStorage.setItem('gh_advent_token', token);
+
+      const { owner, repo } = getRepoInfo();
+      if (!owner || !repo) {
+        statusEl.textContent = "Erreur : ouvre cette page depuis ton lien github.io.";
+        return;
+      }
+
+      btn.disabled = true;
+      statusEl.style.color = "#1e352f";
+
+      try {
+        let imageFilename = `day${day}.jpg`;
+        const existingEntry = ADVENT_DAYS.find(d => d.day === day);
+        if (existingEntry) imageFilename = existingEntry.image;
+
+        // 1. Upload image if selected
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+          imageFilename = `day${day}.${ext}`;
+
+          statusEl.textContent = "1/2 Envoi de la photo sur GitHub...";
+          const base64Img = await fileToBase64(file);
+
+          let imgSha = undefined;
+          try {
+            const existingImg = await ghRequest(`/repos/${owner}/${repo}/contents/${imageFilename}`, token);
+            imgSha = existingImg.sha;
+          } catch (_) {}
+
+          await ghRequest(`/repos/${owner}/${repo}/contents/${imageFilename}`, token, {
+            method: 'PUT',
+            body: JSON.stringify({
+              message: `Ajout photo jour ${day}`,
+              content: base64Img,
+              ...(imgSha ? { sha: imgSha } : {})
+            })
+          });
+        }
+
+        // 2. Update days.js
+        statusEl.textContent = "2/2 Mise à jour du texte...";
+        const daysFile = await ghRequest(`/repos/${owner}/${repo}/contents/days.js`, token);
+
+        const updatedDays = [...ADVENT_DAYS];
+        const idx = updatedDays.findIndex(d => d.day === day);
+        if (idx >= 0) {
+          updatedDays[idx] = { day, image: imageFilename, text };
+        } else {
+          updatedDays.push({ day, image: imageFilename, text });
+          updatedDays.sort((a, b) => a.day - b.day);
+        }
+
+        const newJsContent = `const ADVENT_DAYS = ${JSON.stringify(updatedDays, null, 2)};\n`;
+        const encodedJs = btoa(unescape(encodeURIComponent(newJsContent)));
+
+        await ghRequest(`/repos/${owner}/${repo}/contents/days.js`, token, {
+          method: 'PUT',
+          body: JSON.stringify({
+            message: `Mise à jour jour ${day}`,
+            content: encodedJs,
+            sha: daysFile.sha
+          })
+        });
+
+        statusEl.style.color = "green";
+        statusEl.textContent = `✅ Jour ${day} publié ! Le site se mettra à jour dans ~45 secondes.`;
+        fileInput.value = "";
+      } catch (err) {
+        statusEl.style.color = "#8c2f39";
+        statusEl.textContent = `❌ ${err.message}`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // =========================================================================
+    // CALENDAR & VIETNAM COUNTDOWN ENGINE
+    // =========================================================================
     function getVietnamNow() {
       const now = new Date();
       const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -277,7 +345,7 @@
     }
 
     function getMaxUnlockedDay() {
-      if (isPreview) return 31;
+      if (isPreview || isAdmin) return 31;
       const vnNow = getVietnamNow();
       const year = vnNow.getFullYear();
       const month = vnNow.getMonth();
