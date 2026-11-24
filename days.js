@@ -6,8 +6,8 @@ const ADVENT_DAYS = [
   },
   {
     "day": 2,
-    "image": "day2.jpg",
-    "text": "Une de mes photos préférées de nous. Ton sourire me manque chaque jour."
+    "image": "day2.jpeg",
+    "text": "Une de mes photos préférées de toi. Tu sais pas manger et j'ai gardé la photo MDRRRRRR"
   },
   {
     "day": 3,
