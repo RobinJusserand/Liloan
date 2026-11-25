@@ -344,11 +344,15 @@
     // =========================================================================
     // SURPRISE MODE & VIETNAM COUNTDOWN ENGINE
     // =========================================================================
-    function getVietnamNow() {
-      const now = new Date();
-      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-      return new Date(utcMs + VN_OFFSET_MS);
-    }
+  function getVietnamNow() {
+  const testDay = Number(params.get('testday'));
+  if (testDay >= 1 && testDay <= 31) {
+    return new Date(TARGET_YEAR, 11, testDay, 0, 1, 0);
+  }
+  const now = new Date();
+  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+  return new Date(utcMs + VN_OFFSET_MS);
+}
 
     function getMaxUnlockedDay() {
       if (isPreview || isAdmin) return 31;
