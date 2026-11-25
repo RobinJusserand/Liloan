@@ -10,12 +10,10 @@
       --bg-top: #0f1f1c;
       --bg-mid: #1a2e2a;
       --bg-bottom: #2c151b;
-      --card-glass: rgba(255, 250, 244, 0.08);
       --card-border: rgba(232, 197, 116, 0.35);
       --gold: #e8c574;
       --gold-bright: #ffe5a3;
       --crimson: #a62c3b;
-      --crimson-glow: rgba(196, 54, 72, 0.45);
       --cream: #fdf8f0;
       --text-dark: #23191a;
     }
@@ -40,7 +38,6 @@
       justify-content: flex-start;
     }
 
-    /* Falling Snowflakes Canvas */
     #snow-canvas {
       position: fixed;
       inset: 0;
@@ -50,7 +47,7 @@
       z-index: 1;
     }
 
-    header, .countdown-box, .grid, .admin-panel {
+    header, .countdown-box, .teaser-box, .grid, .admin-panel {
       position: relative;
       z-index: 2;
     }
@@ -89,7 +86,7 @@
       color: var(--cream);
       padding: 22px 28px;
       border-radius: 20px;
-      margin-bottom: 30px;
+      margin-bottom: 26px;
       text-align: center;
       box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       border: 1px solid var(--card-border);
@@ -113,6 +110,41 @@
       letter-spacing: 1.5px;
       color: #fff;
       text-shadow: 0 2px 10px rgba(232, 197, 116, 0.3);
+    }
+
+    /* Pre-December 1st Teaser Box */
+    .teaser-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .teaser-box.visible { display: flex; }
+
+    .teaser-btn {
+      background: linear-gradient(135deg, #b83344, #7a1c28);
+      color: var(--cream);
+      border: 1.5px solid var(--gold);
+      padding: 13px 24px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(166, 44, 59, 0.45);
+      transition: transform 0.2s ease;
+    }
+    .teaser-btn:hover { transform: scale(1.04); }
+
+    .snowglobe-hint {
+      font-size: 0.78rem;
+      color: rgba(253, 248, 240, 0.75);
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.07);
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 197, 116, 0.25);
     }
 
     /* Advent Calendar Grid */
@@ -141,7 +173,6 @@
       transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
     }
 
-    /* Locked Pine Glass Tile */
     .tile.locked {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(6px);
@@ -150,7 +181,6 @@
       cursor: not-allowed;
     }
 
-    /* Active Today Festive Crimson & Gold Tile */
     .tile.unlocked {
       background: linear-gradient(145deg, #b83344, #7a1c28);
       color: var(--cream);
@@ -163,7 +193,6 @@
       transform: translateY(-3px) scale(1.04);
     }
 
-    /* Already Revealed Photo Tile */
     .tile.opened {
       cursor: pointer;
       border: 2px solid var(--gold);
@@ -323,7 +352,7 @@
     .modal-body { padding: 20px 24px 26px; text-align: center; }
     .modal-date { font-family: 'Cormorant Garamond', serif; font-size: 1.95rem; color: var(--crimson); margin-bottom: 12px; }
 
-    /* Instagram-Style Spinning Vinyl Player */
+    /* Music Section with Wax-Sealed Envelope Overlay */
     .vinyl-wrapper {
       display: none;
       flex-direction: column;
@@ -335,8 +364,62 @@
       margin-bottom: 14px;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
       text-align: left;
+      position: relative;
+      overflow: hidden;
     }
     .vinyl-wrapper.visible { display: flex; }
+
+    /* Sealed Envelope Overlay specifically for the Song */
+    .music-envelope-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #f9f1e4, #efe0c9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 10px 14px;
+      z-index: 5;
+      cursor: pointer;
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .music-envelope-overlay.unsealed {
+      opacity: 0;
+      transform: scale(1.04);
+      pointer-events: none;
+    }
+
+    .mini-wax-seal {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #c9384a, #7d1925);
+      border: 1.5px solid var(--gold);
+      color: var(--gold-bright);
+      font-family: 'Great Vibes', cursive;
+      font-size: 1.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(125, 25, 37, 0.3);
+      animation: festiveGlow 2s infinite;
+    }
+
+    .music-envelope-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .music-envelope-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--crimson);
+    }
+    .music-envelope-sub {
+      font-size: 0.74rem;
+      color: #5c4b4c;
+    }
 
     .vinyl-top-row {
       display: flex;
@@ -441,7 +524,7 @@
       <input type="password" id="gh-token" placeholder="Colle ton token github_pat_..." />
     </div>
     <div class="admin-field">
-      <label>Choisir le jour (1 à 31)</label>
+      <label>Choisir le jour (0 = Avant-goût, 1 à 31)</label>
       <select id="admin-day"></select>
     </div>
     <div class="admin-field">
@@ -451,7 +534,7 @@
     <div class="admin-field">
       <label>Lien YouTube ou Spotify</label>
       <input type="url" id="admin-song-url" placeholder="https://youtu.be/... ou https://open.spotify.com/track/..." />
-      <div class="admin-hint">Recommandé : Un lien YouTube ou un fichier MP3 démarre automatiquement dès que la photo est grattée.</div>
+      <div class="admin-hint">Recommandé : Un lien YouTube ou un fichier MP3 démarre dès l'ouverture de l'enveloppe musicale.</div>
     </div>
     <div class="admin-row">
       <div class="admin-field">
@@ -480,6 +563,12 @@
     <div class="countdown-timer" id="countdown-timer">--j --h --m --s</div>
   </div>
 
+  <!-- Pre-December 1st Teaser -->
+  <div class="teaser-box" id="teaser-box">
+    <button class="teaser-btn" onclick="openTeaserDay()">💌 Ouvrir l'avant-goût (Jour 0)</button>
+    <div class="snowglobe-hint" onclick="swirlSnow()">❄️ Touche l'écran pour secouer la boule à neige</div>
+  </div>
+
   <div class="grid" id="calendar-grid"></div>
 
   <!-- Floating Christmas Music Box Button -->
@@ -488,7 +577,7 @@
     <span id="ambient-label">Musique de Noël : Off</span>
   </button>
 
-  <!-- Modal with Scratch-off & Vinyl Player -->
+  <!-- Modal with Immediate Scratch-off Photo & Wax-Sealed Music Envelope -->
   <div class="modal-backdrop" id="modal-backdrop" onclick="if(event.target === this) closeModal()">
     <div class="modal">
       <button class="close-btn" onclick="closeModal()">&times;</button>
@@ -501,8 +590,16 @@
       <div class="modal-body">
         <h2 class="modal-date" id="modal-date">1er décembre</h2>
 
-        <!-- Instagram-style Vinyl Player -->
+        <!-- Vinyl Player with Wax-Sealed Music Envelope -->
         <div class="vinyl-wrapper" id="vinyl-wrapper">
+          <div class="music-envelope-overlay" id="music-envelope" onclick="unsealMusicEnvelope()">
+            <div class="mini-wax-seal">♥</div>
+            <div class="music-envelope-text">
+              <span class="music-envelope-title">💌 Enveloppe musicale du jour</span>
+              <span class="music-envelope-sub" id="music-envelope-sub">Gratte la photo ou touche ici pour écouter</span>
+            </div>
+          </div>
+
           <div class="vinyl-top-row">
             <div class="vinyl-disc" id="vinyl-disc">
               <img class="vinyl-center-art" id="vinyl-art" src="" alt="" />
@@ -529,7 +626,7 @@
 
   <script>
     // =========================================================================
-    // GENTLE WINTER SNOWFALL ANIMATION
+    // GENTLE WINTER SNOWFALL + INTERACTIVE SNOWGLOBE SWIRL
     // =========================================================================
     (function initSnow() {
       const canvas = document.getElementById('snow-canvas');
@@ -542,21 +639,43 @@
         height = canvas.height = window.innerHeight;
       });
 
-      const flakes = Array.from({ length: 55 }, () => ({
+      const flakes = Array.from({ length: 60 }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
         r: Math.random() * 2.8 + 1,
         speedY: Math.random() * 0.7 + 0.3,
         drift: Math.random() * 0.5 - 0.25,
-        opacity: Math.random() * 0.55 + 0.2
+        opacity: Math.random() * 0.55 + 0.2,
+        gold: Math.random() > 0.8
       }));
+
+      window.swirlSnow = function() {
+        flakes.forEach(f => {
+          f.speedY = Math.random() * 2.6 + 1.4;
+          f.drift = (Math.random() - 0.5) * 4.2;
+        });
+        setTimeout(() => {
+          flakes.forEach(f => {
+            f.speedY = Math.random() * 0.7 + 0.3;
+            f.drift = Math.random() * 0.5 - 0.25;
+          });
+        }, 1800);
+      };
+
+      document.body.addEventListener('click', (e) => {
+        if (e.target === document.body || e.target.id === 'snow-canvas') {
+          window.swirlSnow();
+        }
+      });
 
       function drawSnow() {
         ctx.clearRect(0, 0, width, height);
         flakes.forEach(f => {
           ctx.beginPath();
           ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 250, 240, ${f.opacity})`;
+          ctx.fillStyle = f.gold
+            ? `rgba(232, 197, 116, ${f.opacity})`
+            : `rgba(255, 250, 240, ${f.opacity})`;
           ctx.fill();
 
           f.y += f.speedY;
@@ -580,7 +699,6 @@
     let melodyTimer = null;
     let noteIndex = 0;
 
-    // Gentle music-box notes for "We Wish You a Merry Christmas" (freq in Hz, duration in ms)
     const XMAS_MELODY = [
       [261.63, 420], [349.23, 420], [349.23, 210], [392.00, 210], [349.23, 210], [329.63, 210],
       [293.66, 420], [293.66, 420], [293.66, 420], [392.00, 420], [392.00, 210], [440.00, 210],
@@ -671,10 +789,10 @@
       if (savedToken) document.getElementById('gh-token').value = savedToken;
 
       const daySelect = document.getElementById('admin-day');
-      for (let i = 1; i <= 31; i++) {
+      for (let i = 0; i <= 31; i++) {
         const opt = document.createElement('option');
         opt.value = i;
-        opt.textContent = i === 1 ? '1er décembre' : `${i} décembre`;
+        opt.textContent = i === 0 ? 'Jour 0 (Avant-goût avant le 1er déc.)' : (i === 1 ? '1er décembre' : `${i} décembre`);
         daySelect.appendChild(opt);
       }
       daySelect.addEventListener('change', prefillAdminFields);
@@ -831,7 +949,7 @@
     }
 
     // =========================================================================
-    // SPINNING VINYL + YOUTUBE / SPOTIFY / MP3 AUTO-PLAYER
+    // SPINNING VINYL + WAX-SEALED MUSIC ENVELOPE
     // =========================================================================
     function extractYouTubeId(url) {
       if (!url) return null;
@@ -855,6 +973,8 @@
 
     function prepareMusicPlayer(item) {
       const vinylWrapper = document.getElementById('vinyl-wrapper');
+      const musicEnvelope = document.getElementById('music-envelope');
+      const envelopeSub = document.getElementById('music-envelope-sub');
       const embedContainer = document.getElementById('embed-container');
       const audio = document.getElementById('day-audio');
       const disc = document.getElementById('vinyl-disc');
@@ -876,7 +996,6 @@
         return;
       }
 
-      // Pause ambient Christmas music box while daily song modal is open
       if (ambientPlaying) {
         ambientPausedForModal = true;
         ambientPlaying = false;
@@ -885,6 +1004,9 @@
       }
 
       vinylWrapper.classList.add('visible');
+      musicEnvelope.classList.remove('unsealed');
+      envelopeSub.textContent = "Gratte la photo ou touche ici pour écouter";
+
       document.getElementById('vinyl-art').src = item.image;
       document.getElementById('song-title').textContent = item.songTitle || "Notre chanson";
       document.getElementById('song-artist').textContent = item.songArtist || "";
@@ -905,6 +1027,7 @@
             events: {
               onStateChange: (event) => {
                 if (event.data === YT.PlayerState.PLAYING) {
+                  musicEnvelope.classList.add('unsealed');
                   disc.classList.add('spinning');
                   playBtn.textContent = '❚❚';
                 } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
@@ -947,24 +1070,48 @@
       }
     }
 
-    function startRevealedMusic(item) {
+    // Explicit tap on the Music Envelope -> guaranteed user gesture to start playback!
+    function unsealMusicEnvelope() {
+      const musicEnvelope = document.getElementById('music-envelope');
+      musicEnvelope.classList.add('unsealed');
+      startRevealedMusic(currentModalItem, true);
+    }
+
+    function startRevealedMusic(item, fromDirectTap = false) {
       if (!item) return;
+      const musicEnvelope = document.getElementById('music-envelope');
+      const envelopeSub = document.getElementById('music-envelope-sub');
       const audio = document.getElementById('day-audio');
       const disc = document.getElementById('vinyl-disc');
       const playBtn = document.getElementById('vinyl-play-btn');
       const ytId = extractYouTubeId(item.songUrl);
+      const isSpotify = item.songUrl && item.songUrl.includes('open.spotify.com');
+
+      if (isSpotify) {
+        // Spotify embeds always require tapping inside the widget, so unseal smoothly
+        musicEnvelope.classList.add('unsealed');
+        return;
+      }
 
       if (ytId) {
         if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
-          ytPlayer.mute();
+          if (!fromDirectTap) ytPlayer.mute();
+          else ytPlayer.unMute();
           ytPlayer.playVideo();
           setTimeout(() => {
             if (ytPlayer && typeof ytPlayer.unMute === 'function') {
               ytPlayer.unMute();
               ytPlayer.setVolume(100);
             }
-          }, 300);
+            // If browser blocked auto-start after scratch, keep envelope ready for 1 tap
+            if (ytPlayer.getPlayerState && ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+              envelopeSub.textContent = "Touche le sceau ♥ pour lancer la musique";
+            } else {
+              musicEnvelope.classList.add('unsealed');
+            }
+          }, 350);
         } else {
+          musicEnvelope.classList.add('unsealed');
           const embedContainer = document.getElementById('embed-container');
           embedContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&playsinline=1&rel=0" height="150" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
           embedContainer.classList.add('visible');
@@ -972,11 +1119,14 @@
       } else if (item.songFile) {
         audio.muted = false;
         audio.play().then(() => {
+          musicEnvelope.classList.add('unsealed');
           disc.classList.add('spinning');
           playBtn.textContent = '❚❚';
         }).catch(() => {
+          // Keep envelope sealed as a tap target if mobile Safari blocked scratch-triggered audio
           disc.classList.remove('spinning');
           playBtn.textContent = '▶';
+          envelopeSub.textContent = "Touche le sceau ♥ pour lancer la musique";
         });
       }
     }
@@ -1027,7 +1177,7 @@
 
       if (alreadyScratched) {
         canvas.classList.add('revealed-foil');
-        setTimeout(() => startRevealedMusic(currentModalItem), 250);
+        setTimeout(() => startRevealedMusic(currentModalItem, false), 250);
         return;
       }
 
@@ -1083,7 +1233,7 @@
       if (ratio > 0.42) {
         scratchCompleted = true;
         canvas.classList.add('revealed-foil');
-        startRevealedMusic(currentModalItem);
+        startRevealedMusic(currentModalItem, false);
       }
     }
 
@@ -1107,7 +1257,7 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
 
     // =========================================================================
-    // SURPRISE MODE & VIETNAM COUNTDOWN ENGINE
+    // SURPRISE MODE, PRE-DEC 1 TEASER & VIETNAM COUNTDOWN ENGINE
     // =========================================================================
     function getVietnamNow() {
       const testDay = Number(params.get('testday'));
@@ -1137,18 +1287,21 @@
       const isRevealed = isPreview || isAdmin || vnNow >= dec1;
 
       const grid = document.getElementById('calendar-grid');
+      const teaserBox = document.getElementById('teaser-box');
       const titleEl = document.getElementById('main-title');
       const subtitleEl = document.getElementById('main-subtitle');
 
       if (isRevealed) {
         document.body.classList.add('revealed');
         grid.classList.add('visible');
+        teaserBox.classList.remove('visible');
         document.title = "31 jours avant le 31 décembre";
         titleEl.textContent = "31 jours avant nos retrouvailles";
         subtitleEl.textContent = "Un nouveau souvenir se débloque chaque jour à minuit (heure du Vietnam) jusqu'au 31 décembre.";
       } else {
         document.body.classList.remove('revealed');
         grid.classList.remove('visible');
+        teaserBox.classList.add('visible');
         document.title = "Un peu de patience...";
         titleEl.textContent = "Un peu de patience...";
         subtitleEl.textContent = "Une surprise t'attend ici dès le 1er décembre à minuit (heure du Vietnam).";
@@ -1190,7 +1343,7 @@
 
       const data = typeof ADVENT_DAYS !== 'undefined' ? ADVENT_DAYS : [];
 
-      data.forEach(item => {
+      data.filter(item => item.day >= 1).forEach(item => {
         const tile = document.createElement('div');
         tile.className = 'tile';
 
@@ -1215,11 +1368,23 @@
       });
     }
 
+    function openTeaserDay() {
+      const data = typeof ADVENT_DAYS !== 'undefined' ? ADVENT_DAYS : [];
+      const day0 = data.find(d => d.day === 0) || data[0] || {
+        day: 0,
+        image: 'day1.jpg',
+        text: "Encore un tout petit peu de patience mon cœur... Le vrai calendrier commence le 1er décembre à minuit ! ❤️"
+      };
+      openDay(day0, false);
+    }
+
     function openDay(item, alreadyScratched) {
       currentModalItem = item;
 
       document.getElementById('modal-photo').src = item.image;
-      document.getElementById('modal-date').textContent = item.day === 1 ? "1er décembre" : `${item.day} décembre`;
+      document.getElementById('modal-date').textContent = item.day === 0
+        ? "Avant-goût ✨"
+        : (item.day === 1 ? "1er décembre" : `${item.day} décembre`);
       document.getElementById('modal-text').textContent = item.text || "";
 
       prepareMusicPlayer(item);
@@ -1236,7 +1401,6 @@
       document.getElementById('vinyl-disc').classList.remove('spinning');
       document.getElementById('modal-backdrop').classList.remove('active');
 
-      // Resume Christmas music box if it was playing before opening the popup
       if (ambientPausedForModal) {
         ambientPausedForModal = false;
         ambientPlaying = true;
