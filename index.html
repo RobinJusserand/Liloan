@@ -113,6 +113,7 @@
     .admin-field input, .admin-field select, .admin-field textarea {
       width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.92rem;
     }
+    .admin-hint { font-size: 0.74rem; color: #666; margin-top: 3px; }
     .admin-btn {
       background: var(--green); color: #fff; border: none; padding: 12px; border-radius: 8px;
       width: 100%; font-weight: 600; cursor: pointer; font-size: 0.95rem;
@@ -172,19 +173,25 @@
     .modal-date { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: var(--red); margin-bottom: 12px; }
 
     /* Instagram-Style Spinning Vinyl Player */
-    .vinyl-card {
+    .vinyl-wrapper {
       display: none;
-      align-items: center;
-      gap: 14px;
+      flex-direction: column;
+      gap: 10px;
       background: #fff;
       border: 1px solid rgba(212, 175, 55, 0.5);
       border-radius: 14px;
-      padding: 10px 14px;
+      padding: 12px 14px;
       margin-bottom: 14px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.06);
       text-align: left;
     }
-    .vinyl-card.visible { display: flex; }
+    .vinyl-wrapper.visible { display: flex; }
+
+    .vinyl-top-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
 
     .vinyl-disc {
       width: 54px;
@@ -252,6 +259,15 @@
       flex-shrink: 0;
     }
 
+    .embed-container {
+      display: none;
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .embed-container.visible { display: block; }
+    .embed-container iframe { width: 100%; border: none; display: block; }
+
     .modal-text { font-size: 1rem; line-height: 1.65; color: #2b2b2b; }
 
     .test-reset-btn {
@@ -286,15 +302,14 @@
       <label>Choisir le jour (1 à 31)</label>
       <select id="admin-day"></select>
     </div>
-    <div class="admin-row">
-      <div class="admin-field">
-        <label>Choisir la photo</label>
-        <input type="file" id="admin-file" accept="image/*" />
-      </div>
-      <div class="admin-field">
-        <label>Chanson (.mp3 optionnel)</label>
-        <input type="file" id="admin-audio" accept="audio/*" />
-      </div>
+    <div class="admin-field">
+      <label>Photo (laisser vide pour garder la photo actuelle)</label>
+      <input type="file" id="admin-file" accept="image/*" />
+    </div>
+    <div class="admin-field">
+      <label>Lien Spotify ou YouTube (sans télécharger de MP3 !)</label>
+      <input type="url" id="admin-song-url" placeholder="https://open.spotify.com/track/... ou https://youtu.be/..." />
+      <div class="admin-hint">Colle simplement le lien Partager de Spotify ou YouTube.</div>
     </div>
     <div class="admin-row">
       <div class="admin-field">
@@ -305,6 +320,10 @@
         <label>Artiste</label>
         <input type="text" id="admin-song-artist" placeholder="Ex: Angèle" />
       </div>
+    </div>
+    <div class="admin-field">
+      <label>Ou fichier audio (.mp3 optionnel)</label>
+      <input type="file" id="admin-audio" accept="audio/*" />
     </div>
     <div class="admin-field">
       <label>Petit mot en français</label>
@@ -335,18 +354,21 @@
         <h2 class="modal-date" id="modal-date">1er décembre</h2>
 
         <!-- Instagram-style Vinyl Player -->
-        <div class="vinyl-card" id="vinyl-card">
-          <div class="vinyl-disc" id="vinyl-disc">
-            <img class="vinyl-center-art" id="vinyl-art" src="" alt="" />
-            <div class="vinyl-hole"></div>
+        <div class="vinyl-wrapper" id="vinyl-wrapper">
+          <div class="vinyl-top-row">
+            <div class="vinyl-disc" id="vinyl-disc">
+              <img class="vinyl-center-art" id="vinyl-art" src="" alt="" />
+              <div class="vinyl-hole"></div>
+            </div>
+            <div class="song-info">
+              <div class="song-badge">🎵 Chanson du jour</div>
+              <div class="song-title" id="song-title">Titre</div>
+              <div class="song-artist" id="song-artist">Artiste</div>
+            </div>
+            <button class="vinyl-play-btn" id="vinyl-play-btn" onclick="toggleAudio()">▶</button>
+            <audio id="day-audio" loop></audio>
           </div>
-          <div class="song-info">
-            <div class="song-badge">🎵 Chanson du jour</div>
-            <div class="song-title" id="song-title">Titre</div>
-            <div class="song-artist" id="song-artist">Artiste</div>
-          </div>
-          <button class="vinyl-play-btn" id="vinyl-play-btn" onclick="toggleAudio()">▶</button>
-          <audio id="day-audio" loop></audio>
+          <div class="embed-container" id="embed-container"></div>
         </div>
 
         <p class="modal-text" id="modal-text"></p>
@@ -368,7 +390,7 @@
     let currentModalItem = null;
 
     // =========================================================================
-    // ADMIN UPLOADER LOGIC (Photos + MP3 Songs)
+    // ADMIN UPLOADER LOGIC (Supports keeping existing photo + Spotify/YT links)
     // =========================================================================
     if (isAdmin) {
       document.getElementById('admin-panel').classList.add('visible');
@@ -390,6 +412,7 @@
       const day = Number(document.getElementById('admin-day').value);
       const found = (typeof ADVENT_DAYS !== 'undefined') && ADVENT_DAYS.find(d => d.day === day);
       document.getElementById('admin-text').value = found ? (found.text || '') : '';
+      document.getElementById('admin-song-url').value = found ? (found.songUrl || '') : '';
       document.getElementById('admin-song-title').value = found ? (found.songTitle || '') : '';
       document.getElementById('admin-song-artist').value = found ? (found.songArtist || '') : '';
     }
@@ -451,6 +474,7 @@
       const day = Number(document.getElementById('admin-day').value);
       const fileInput = document.getElementById('admin-file');
       const audioInput = document.getElementById('admin-audio');
+      const songUrl = document.getElementById('admin-song-url').value.trim();
       const songTitle = document.getElementById('admin-song-title').value.trim();
       const songArtist = document.getElementById('admin-song-artist').value.trim();
       const text = document.getElementById('admin-text').value.trim();
@@ -469,6 +493,7 @@
 
       try {
         const existingEntry = ADVENT_DAYS.find(d => d.day === day) || {};
+        // Keeps existing photo if no new file is selected
         let imageFilename = existingEntry.image || `day${day}.jpg`;
         let songFilename = existingEntry.songFile || "";
 
@@ -476,7 +501,7 @@
           const file = fileInput.files[0];
           const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
           imageFilename = `day${day}.${ext}`;
-          statusEl.textContent = "Envoi de la photo sur GitHub...";
+          statusEl.textContent = "Envoi de la nouvelle photo sur GitHub...";
           await uploadBinaryFile(owner, repo, token, imageFilename, file, `Ajout photo jour ${day}`);
         }
 
@@ -496,7 +521,8 @@
           day,
           image: imageFilename,
           text,
-          ...(songFilename ? { songFile: songFilename } : {}),
+          ...(songUrl ? { songUrl } : {}),
+          ...(songFilename && !songUrl ? { songFile: songFilename } : {}),
           ...(songTitle ? { songTitle } : {}),
           ...(songArtist ? { songArtist } : {})
         };
@@ -554,7 +580,6 @@
       canvas.width = container.offsetWidth || 440;
       canvas.height = container.offsetHeight || 340;
 
-      // Gold metallic foil gradient
       const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
       grad.addColorStop(0, '#c89d28');
       grad.addColorStop(0.3, '#f3db82');
@@ -565,7 +590,6 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Subtle shimmer text prompt
       ctx.fillStyle = 'rgba(30, 53, 47, 0.85)';
       ctx.font = '600 18px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
@@ -592,7 +616,7 @@
       const ctx = canvas.getContext('2d');
       const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
       let transparent = 0;
-      const step = 32; // Sample every 8th pixel for fast mobile performance
+      const step = 32;
 
       for (let i = 3; i < pixels.length; i += step) {
         if (pixels[i] === 0) transparent++;
@@ -638,12 +662,34 @@
     }
 
     // =========================================================================
-    // SPINNING VINYL AUDIO PLAYER
+    // SPINNING VINYL + SPOTIFY / YOUTUBE / MP3 PLAYER
     // =========================================================================
+    function buildEmbedHtml(url) {
+      if (!url) return null;
+      // Spotify track/album/playlist
+      const spotifyMatch = url.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+      if (spotifyMatch) {
+        return `<iframe src="https://open.spotify.com/embed/${spotifyMatch[1]}/${spotifyMatch[2]}?utm_source=generator&theme=0" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+      }
+      // YouTube video
+      const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch) {
+        return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" height="150" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      }
+      return null;
+    }
+
     function toggleAudio() {
       const audio = document.getElementById('day-audio');
       const disc = document.getElementById('vinyl-disc');
       const btn = document.getElementById('vinyl-play-btn');
+
+      if (!audio.src) {
+        // Toggle visual vinyl spin when using Spotify/YouTube embed
+        const spinning = disc.classList.toggle('spinning');
+        btn.textContent = spinning ? '❚❚' : '▶';
+        return;
+      }
 
       if (audio.paused) {
         audio.play().then(() => {
@@ -774,38 +820,46 @@
       document.getElementById('modal-date').textContent = item.day === 1 ? "1er décembre" : `${item.day} décembre`;
       document.getElementById('modal-text').textContent = item.text || "";
 
-      // Setup Vinyl Song Player if song exists
-      const vinylCard = document.getElementById('vinyl-card');
+      const vinylWrapper = document.getElementById('vinyl-wrapper');
+      const embedContainer = document.getElementById('embed-container');
       const audio = document.getElementById('day-audio');
       const disc = document.getElementById('vinyl-disc');
       const playBtn = document.getElementById('vinyl-play-btn');
 
       audio.pause();
+      audio.removeAttribute('src');
       disc.classList.remove('spinning');
       playBtn.textContent = '▶';
+      embedContainer.innerHTML = '';
+      embedContainer.classList.remove('visible');
 
-      if (item.songFile || item.songTitle) {
-        vinylCard.classList.add('visible');
+      const hasSong = item.songUrl || item.songFile || item.songTitle;
+      if (hasSong) {
+        vinylWrapper.classList.add('visible');
         document.getElementById('vinyl-art').src = item.image;
         document.getElementById('song-title').textContent = item.songTitle || "Notre chanson";
         document.getElementById('song-artist').textContent = item.songArtist || "";
-        if (item.songFile) {
+
+        const embedHtml = buildEmbedHtml(item.songUrl);
+        if (embedHtml) {
+          embedContainer.innerHTML = embedHtml;
+          embedContainer.classList.add('visible');
+          disc.classList.add('spinning');
+          playBtn.style.display = 'none';
+        } else if (item.songFile) {
           audio.src = item.songFile;
           playBtn.style.display = 'flex';
-          // Auto-play attempt when opened
           audio.play().then(() => {
             disc.classList.add('spinning');
             playBtn.textContent = '❚❚';
           }).catch(() => {});
         } else {
-          audio.removeAttribute('src');
           playBtn.style.display = 'none';
         }
       } else {
-        vinylCard.classList.remove('visible');
+        vinylWrapper.classList.remove('visible');
       }
 
-      // Show test reset button only when testing/admin
       const resetBtn = document.getElementById('test-reset-btn');
       if (isPreview || isAdmin || params.get('testday')) {
         resetBtn.classList.add('visible');
@@ -820,6 +874,7 @@
     function closeModal() {
       const audio = document.getElementById('day-audio');
       audio.pause();
+      document.getElementById('embed-container').innerHTML = '';
       document.getElementById('vinyl-disc').classList.remove('spinning');
       document.getElementById('modal-backdrop').classList.remove('active');
     }
