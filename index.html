@@ -307,9 +307,9 @@
       <input type="file" id="admin-file" accept="image/*" />
     </div>
     <div class="admin-field">
-      <label>Lien Spotify ou YouTube (sans télécharger de MP3 !)</label>
-      <input type="url" id="admin-song-url" placeholder="https://open.spotify.com/track/... ou https://youtu.be/..." />
-      <div class="admin-hint">Colle simplement le lien Partager de Spotify ou YouTube.</div>
+      <label>Lien YouTube ou Spotify (sans télécharger de MP3 !)</label>
+      <input type="url" id="admin-song-url" placeholder="https://youtu.be/... ou https://open.spotify.com/track/..." />
+      <div class="admin-hint">Astuce : Les liens YouTube ou fichiers MP3 lancent la musique automatiquement dès que la photo est révélée.</div>
     </div>
     <div class="admin-row">
       <div class="admin-field">
@@ -390,7 +390,7 @@
     let currentModalItem = null;
 
     // =========================================================================
-    // ADMIN UPLOADER LOGIC (Supports keeping existing photo + Spotify/YT links)
+    // ADMIN UPLOADER LOGIC
     // =========================================================================
     if (isAdmin) {
       document.getElementById('admin-panel').classList.add('visible');
@@ -493,7 +493,6 @@
 
       try {
         const existingEntry = ADVENT_DAYS.find(d => d.day === day) || {};
-        // Keeps existing photo if no new file is selected
         let imageFilename = existingEntry.image || `day${day}.jpg`;
         let songFilename = existingEntry.songFile || "";
 
@@ -559,6 +558,100 @@
     }
 
     // =========================================================================
+    // SPINNING VINYL + SPOTIFY / YOUTUBE / MP3 PLAYER (Starts on Reveal!)
+    // =========================================================================
+    function buildEmbedHtml(url, autoPlay = false) {
+      if (!url) return null;
+      const spotifyMatch = url.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+      if (spotifyMatch) {
+        return `<iframe src="https://open.spotify.com/embed/${spotifyMatch[1]}/${spotifyMatch[2]}?utm_source=generator&theme=0" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+      }
+      const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch) {
+        const autoParam = autoPlay ? '?autoplay=1&rel=0' : '?rel=0';
+        return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}${autoParam}" height="150" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      }
+      return null;
+    }
+
+    function prepareMusicPlayer(item) {
+      const vinylWrapper = document.getElementById('vinyl-wrapper');
+      const embedContainer = document.getElementById('embed-container');
+      const audio = document.getElementById('day-audio');
+      const disc = document.getElementById('vinyl-disc');
+      const playBtn = document.getElementById('vinyl-play-btn');
+
+      audio.pause();
+      audio.removeAttribute('src');
+      disc.classList.remove('spinning');
+      playBtn.textContent = '▶';
+      embedContainer.innerHTML = '';
+      embedContainer.classList.remove('visible');
+
+      const hasSong = item.songUrl || item.songFile || item.songTitle;
+      if (!hasSong) {
+        vinylWrapper.classList.remove('visible');
+        return;
+      }
+
+      vinylWrapper.classList.add('visible');
+      document.getElementById('vinyl-art').src = item.image;
+      document.getElementById('song-title').textContent = item.songTitle || "Notre chanson";
+      document.getElementById('song-artist').textContent = item.songArtist || "";
+
+      if (item.songFile && !item.songUrl) {
+        audio.src = item.songFile;
+        playBtn.style.display = 'flex';
+      } else {
+        playBtn.style.display = 'none';
+      }
+    }
+
+    function startRevealedMusic(item) {
+      if (!item) return;
+      const embedContainer = document.getElementById('embed-container');
+      const audio = document.getElementById('day-audio');
+      const disc = document.getElementById('vinyl-disc');
+      const playBtn = document.getElementById('vinyl-play-btn');
+
+      const embedHtml = buildEmbedHtml(item.songUrl, true);
+      if (embedHtml) {
+        embedContainer.innerHTML = embedHtml;
+        embedContainer.classList.add('visible');
+        disc.classList.add('spinning');
+      } else if (item.songFile) {
+        if (!audio.src) audio.src = item.songFile;
+        audio.play().then(() => {
+          disc.classList.add('spinning');
+          playBtn.textContent = '❚❚';
+        }).catch(() => {});
+      }
+    }
+
+    function toggleAudio() {
+      const audio = document.getElementById('day-audio');
+      const disc = document.getElementById('vinyl-disc');
+      const btn = document.getElementById('vinyl-play-btn');
+
+      if (!audio.src) {
+        const spinning = disc.classList.toggle('spinning');
+        btn.textContent = spinning ? '❚❚' : '▶';
+        return;
+      }
+
+      if (audio.paused) {
+        audio.play().then(() => {
+          disc.classList.add('spinning');
+          btn.textContent = '❚❚';
+        }).catch(() => {});
+      } else {
+        audio.pause();
+        disc.classList.remove('spinning');
+        btn.textContent = '▶';
+      }
+    }
+
+    // =========================================================================
     // SCRATCH-OFF FOIL ENGINE
     // =========================================================================
     let isDrawing = false;
@@ -573,6 +666,7 @@
 
       if (alreadyScratched) {
         canvas.classList.add('revealed-foil');
+        startRevealedMusic(currentModalItem);
         return;
       }
 
@@ -626,6 +720,9 @@
       if (ratio > 0.42) {
         scratchCompleted = true;
         canvas.classList.add('revealed-foil');
+        // Start playing the music the moment the picture is fully revealed!
+        startRevealedMusic(currentModalItem);
+
         if (currentModalItem && !openedDays.includes(currentModalItem.day)) {
           openedDays.push(currentModalItem.day);
           localStorage.setItem('opened_days_2026', JSON.stringify(openedDays));
@@ -657,50 +754,9 @@
       if (!currentModalItem) return;
       openedDays = openedDays.filter(d => d !== currentModalItem.day);
       localStorage.setItem('opened_days_2026', JSON.stringify(openedDays));
+      prepareMusicPlayer(currentModalItem);
       setupScratchCanvas(false);
       renderGrid();
-    }
-
-    // =========================================================================
-    // SPINNING VINYL + SPOTIFY / YOUTUBE / MP3 PLAYER
-    // =========================================================================
-    function buildEmbedHtml(url) {
-      if (!url) return null;
-      // Spotify track/album/playlist
-      const spotifyMatch = url.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
-      if (spotifyMatch) {
-        return `<iframe src="https://open.spotify.com/embed/${spotifyMatch[1]}/${spotifyMatch[2]}?utm_source=generator&theme=0" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
-      }
-      // YouTube video
-      const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
-      if (ytMatch) {
-        return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" height="150" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-      }
-      return null;
-    }
-
-    function toggleAudio() {
-      const audio = document.getElementById('day-audio');
-      const disc = document.getElementById('vinyl-disc');
-      const btn = document.getElementById('vinyl-play-btn');
-
-      if (!audio.src) {
-        // Toggle visual vinyl spin when using Spotify/YouTube embed
-        const spinning = disc.classList.toggle('spinning');
-        btn.textContent = spinning ? '❚❚' : '▶';
-        return;
-      }
-
-      if (audio.paused) {
-        audio.play().then(() => {
-          disc.classList.add('spinning');
-          btn.textContent = '❚❚';
-        }).catch(() => {});
-      } else {
-        audio.pause();
-        disc.classList.remove('spinning');
-        btn.textContent = '▶';
-      }
     }
 
     // =========================================================================
@@ -820,45 +876,8 @@
       document.getElementById('modal-date').textContent = item.day === 1 ? "1er décembre" : `${item.day} décembre`;
       document.getElementById('modal-text').textContent = item.text || "";
 
-      const vinylWrapper = document.getElementById('vinyl-wrapper');
-      const embedContainer = document.getElementById('embed-container');
-      const audio = document.getElementById('day-audio');
-      const disc = document.getElementById('vinyl-disc');
-      const playBtn = document.getElementById('vinyl-play-btn');
-
-      audio.pause();
-      audio.removeAttribute('src');
-      disc.classList.remove('spinning');
-      playBtn.textContent = '▶';
-      embedContainer.innerHTML = '';
-      embedContainer.classList.remove('visible');
-
-      const hasSong = item.songUrl || item.songFile || item.songTitle;
-      if (hasSong) {
-        vinylWrapper.classList.add('visible');
-        document.getElementById('vinyl-art').src = item.image;
-        document.getElementById('song-title').textContent = item.songTitle || "Notre chanson";
-        document.getElementById('song-artist').textContent = item.songArtist || "";
-
-        const embedHtml = buildEmbedHtml(item.songUrl);
-        if (embedHtml) {
-          embedContainer.innerHTML = embedHtml;
-          embedContainer.classList.add('visible');
-          disc.classList.add('spinning');
-          playBtn.style.display = 'none';
-        } else if (item.songFile) {
-          audio.src = item.songFile;
-          playBtn.style.display = 'flex';
-          audio.play().then(() => {
-            disc.classList.add('spinning');
-            playBtn.textContent = '❚❚';
-          }).catch(() => {});
-        } else {
-          playBtn.style.display = 'none';
-        }
-      } else {
-        vinylWrapper.classList.remove('visible');
-      }
+      // Prepare the vinyl player (stays paused until scratch-off completes)
+      prepareMusicPlayer(item);
 
       const resetBtn = document.getElementById('test-reset-btn');
       if (isPreview || isAdmin || params.get('testday')) {
