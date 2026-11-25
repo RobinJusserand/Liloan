@@ -269,19 +269,6 @@
     .embed-container iframe { width: 100%; border: none; display: block; }
 
     .modal-text { font-size: 1rem; line-height: 1.65; color: #2b2b2b; }
-
-    .test-reset-btn {
-      display: none;
-      margin-top: 16px;
-      background: transparent;
-      border: 1px dashed var(--green);
-      color: var(--green);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      cursor: pointer;
-    }
-    .test-reset-btn.visible { display: inline-block; }
   </style>
 </head>
 <body>
@@ -307,9 +294,9 @@
       <input type="file" id="admin-file" accept="image/*" />
     </div>
     <div class="admin-field">
-      <label>Lien YouTube ou Spotify (sans télécharger de MP3 !)</label>
+      <label>Lien YouTube ou Spotify</label>
       <input type="url" id="admin-song-url" placeholder="https://youtu.be/... ou https://open.spotify.com/track/..." />
-      <div class="admin-hint">Astuce : Les liens YouTube ou fichiers MP3 lancent la musique automatiquement dès que la photo est révélée.</div>
+      <div class="admin-hint">Recommandé : Un lien YouTube ou un fichier MP3 démarre automatiquement dès que la photo est grattée.</div>
     </div>
     <div class="admin-row">
       <div class="admin-field">
@@ -366,17 +353,18 @@
               <div class="song-artist" id="song-artist">Artiste</div>
             </div>
             <button class="vinyl-play-btn" id="vinyl-play-btn" onclick="toggleAudio()">▶</button>
-            <audio id="day-audio" loop></audio>
+            <audio id="day-audio" playsinline loop></audio>
           </div>
           <div class="embed-container" id="embed-container"></div>
         </div>
 
         <p class="modal-text" id="modal-text"></p>
-        <button class="test-reset-btn" id="test-reset-btn" onclick="resetCurrentScratch()">🔄 Re-tester l'effet à gratter</button>
       </div>
     </div>
   </div>
 
+  <!-- YouTube IFrame Player API for reliable autoplay after scratch -->
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="days.js"></script>
 
   <script>
@@ -386,8 +374,14 @@
     const isPreview = params.get('preview') === 'true';
     const isAdmin = params.get('admin') === 'true';
 
-    let openedDays = JSON.parse(localStorage.getItem('opened_days_2026') || '[]');
     let currentModalItem = null;
+    let ytPlayer = null;
+    let ytApiReady = false;
+    let audioUnlockedByGesture = false;
+
+    function onYouTubeIframeAPIReady() {
+      ytApiReady = true;
+    }
 
     // =========================================================================
     // ADMIN UPLOADER LOGIC
@@ -558,20 +552,26 @@
     }
 
     // =========================================================================
-    // SPINNING VINYL + SPOTIFY / YOUTUBE / MP3 PLAYER (Starts on Reveal!)
+    // SPINNING VINYL + YOUTUBE / SPOTIFY / MP3 AUTO-PLAYER
     // =========================================================================
-    function buildEmbedHtml(url, autoPlay = false) {
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return ytMatch ? ytMatch[1] : null;
+    }
+
+    function extractSpotifyEmbed(url) {
       if (!url) return null;
       const spotifyMatch = url.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
-      if (spotifyMatch) {
-        return `<iframe src="https://open.spotify.com/embed/${spotifyMatch[1]}/${spotifyMatch[2]}?utm_source=generator&theme=0" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+      if (!spotifyMatch) return null;
+      return `<iframe src="https://open.spotify.com/embed/${spotifyMatch[1]}/${spotifyMatch[2]}?utm_source=generator&theme=0" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+    }
+
+    function destroyYouTubePlayer() {
+      if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+        try { ytPlayer.destroy(); } catch (_) {}
       }
-      const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
-      if (ytMatch) {
-        const autoParam = autoPlay ? '?autoplay=1&rel=0' : '?rel=0';
-        return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}${autoParam}" height="150" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-      }
-      return null;
+      ytPlayer = null;
     }
 
     function prepareMusicPlayer(item) {
@@ -581,8 +581,11 @@
       const disc = document.getElementById('vinyl-disc');
       const playBtn = document.getElementById('vinyl-play-btn');
 
+      audioUnlockedByGesture = false;
       audio.pause();
+      audio.muted = false;
       audio.removeAttribute('src');
+      destroyYouTubePlayer();
       disc.classList.remove('spinning');
       playBtn.textContent = '▶';
       embedContainer.innerHTML = '';
@@ -599,28 +602,84 @@
       document.getElementById('song-title').textContent = item.songTitle || "Notre chanson";
       document.getElementById('song-artist').textContent = item.songArtist || "";
 
-      if (item.songFile && !item.songUrl) {
+      const ytId = extractYouTubeId(item.songUrl);
+      const spotifyHtml = extractSpotifyEmbed(item.songUrl);
+
+      if (ytId) {
+        playBtn.style.display = 'flex';
+        embedContainer.innerHTML = '<div id="yt-player-target"></div>';
+        embedContainer.classList.add('visible');
+        if (ytApiReady && window.YT && YT.Player) {
+          ytPlayer = new YT.Player('yt-player-target', {
+            height: '150',
+            width: '100%',
+            videoId: ytId,
+            playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
+            events: {
+              onStateChange: (event) => {
+                if (event.data === YT.PlayerState.PLAYING) {
+                  disc.classList.add('spinning');
+                  playBtn.textContent = '❚❚';
+                } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                  disc.classList.remove('spinning');
+                  playBtn.textContent = '▶';
+                }
+              }
+            }
+          });
+        }
+      } else if (spotifyHtml) {
+        playBtn.style.display = 'none';
+        embedContainer.innerHTML = spotifyHtml;
+        embedContainer.classList.add('visible');
+      } else if (item.songFile) {
         audio.src = item.songFile;
+        audio.load();
         playBtn.style.display = 'flex';
       } else {
         playBtn.style.display = 'none';
       }
     }
 
+    // Unlock HTML5 Audio on first finger touch while scratching so autoplay works 100%
+    function unlockAudioOnTouch() {
+      if (audioUnlockedByGesture || !currentModalItem || !currentModalItem.songFile) return;
+      const audio = document.getElementById('day-audio');
+      audioUnlockedByGesture = true;
+      audio.muted = true;
+      audio.play().then(() => {
+        if (!scratchCompleted) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+        audio.muted = false;
+      }).catch(() => {
+        audio.muted = false;
+      });
+    }
+
     function startRevealedMusic(item) {
       if (!item) return;
-      const embedContainer = document.getElementById('embed-container');
       const audio = document.getElementById('day-audio');
       const disc = document.getElementById('vinyl-disc');
       const playBtn = document.getElementById('vinyl-play-btn');
+      const ytId = extractYouTubeId(item.songUrl);
 
-      const embedHtml = buildEmbedHtml(item.songUrl, true);
-      if (embedHtml) {
-        embedContainer.innerHTML = embedHtml;
-        embedContainer.classList.add('visible');
-        disc.classList.add('spinning');
+      if (ytId) {
+        if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+          ytPlayer.playVideo();
+          disc.classList.add('spinning');
+          playBtn.textContent = '❚❚';
+        } else {
+          // Fallback if YT API hadn't finished initializing
+          const embedContainer = document.getElementById('embed-container');
+          embedContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&playsinline=1&rel=0" height="150" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          embedContainer.classList.add('visible');
+          disc.classList.add('spinning');
+          playBtn.textContent = '❚❚';
+        }
       } else if (item.songFile) {
-        if (!audio.src) audio.src = item.songFile;
+        audio.muted = false;
         audio.play().then(() => {
           disc.classList.add('spinning');
           playBtn.textContent = '❚❚';
@@ -633,13 +692,20 @@
       const disc = document.getElementById('vinyl-disc');
       const btn = document.getElementById('vinyl-play-btn');
 
-      if (!audio.src) {
-        const spinning = disc.classList.toggle('spinning');
-        btn.textContent = spinning ? '❚❚' : '▶';
+      if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+        const state = ytPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          ytPlayer.pauseVideo();
+        } else {
+          ytPlayer.playVideo();
+        }
         return;
       }
 
+      if (!audio.src) return;
+
       if (audio.paused) {
+        audio.muted = false;
         audio.play().then(() => {
           disc.classList.add('spinning');
           btn.textContent = '❚❚';
@@ -652,7 +718,7 @@
     }
 
     // =========================================================================
-    // SCRATCH-OFF FOIL ENGINE
+    // SCRATCH-OFF FOIL ENGINE (Re-scratches today's tile; past days pre-opened)
     // =========================================================================
     let isDrawing = false;
     let scratchCompleted = false;
@@ -666,7 +732,8 @@
 
       if (alreadyScratched) {
         canvas.classList.add('revealed-foil');
-        startRevealedMusic(currentModalItem);
+        // Wait briefly for YT player if needed, then start music
+        setTimeout(() => startRevealedMusic(currentModalItem), 250);
         return;
       }
 
@@ -694,6 +761,8 @@
 
     function scratchAt(x, y) {
       if (scratchCompleted) return;
+      unlockAudioOnTouch();
+
       const canvas = document.getElementById('scratch-canvas');
       const ctx = canvas.getContext('2d');
 
@@ -720,14 +789,7 @@
       if (ratio > 0.42) {
         scratchCompleted = true;
         canvas.classList.add('revealed-foil');
-        // Start playing the music the moment the picture is fully revealed!
         startRevealedMusic(currentModalItem);
-
-        if (currentModalItem && !openedDays.includes(currentModalItem.day)) {
-          openedDays.push(currentModalItem.day);
-          localStorage.setItem('opened_days_2026', JSON.stringify(openedDays));
-          renderGrid();
-        }
       }
     }
 
@@ -749,15 +811,6 @@
     scratchCanvas.addEventListener('touchstart', (e) => { isDrawing = true; const p = getPos(e); scratchAt(p.x, p.y); }, { passive: true });
     scratchCanvas.addEventListener('touchmove', (e) => { if (isDrawing) { const p = getPos(e); scratchAt(p.x, p.y); } }, { passive: true });
     window.addEventListener('touchend', () => { isDrawing = false; });
-
-    function resetCurrentScratch() {
-      if (!currentModalItem) return;
-      openedDays = openedDays.filter(d => d !== currentModalItem.day);
-      localStorage.setItem('opened_days_2026', JSON.stringify(openedDays));
-      prepareMusicPlayer(currentModalItem);
-      setupScratchCanvas(false);
-      renderGrid();
-    }
 
     // =========================================================================
     // SURPRISE MODE & VIETNAM COUNTDOWN ENGINE
@@ -847,18 +900,20 @@
         const tile = document.createElement('div');
         tile.className = 'tile';
 
-        const isUnlocked = item.day <= maxDay;
-        const isOpened = isAdmin || openedDays.includes(item.day);
+        const isPastDay = !isPreview && !isAdmin && (item.day < maxDay);
+        const isTodayOrPreview = (item.day === maxDay) || isPreview || isAdmin;
 
-        if (isUnlocked && isOpened) {
+        if (isPastDay) {
+          // Past days (e.g., Day 1 when on Day 2) are already scratched & visible
           tile.classList.add('opened');
           tile.style.backgroundImage = `url('${item.image}')`;
           tile.innerHTML = `<span class="tile-num">${item.day}</span>`;
-          tile.onclick = () => openDay(item);
-        } else if (isUnlocked) {
+          tile.onclick = () => openDay(item, true);
+        } else if (isTodayOrPreview && item.day <= maxDay) {
+          // Today's square (and any square in preview/admin) always gets fresh scratch foil
           tile.classList.add('unlocked');
           tile.innerHTML = `<span class="tile-num">${item.day}</span><span class="tile-sub">Gratter ✨</span>`;
-          tile.onclick = () => openDay(item);
+          tile.onclick = () => openDay(item, false);
         } else {
           tile.classList.add('locked');
           tile.innerHTML = `<span class="tile-num">${item.day}</span><span class="tile-sub">🔒</span>`;
@@ -868,31 +923,23 @@
       });
     }
 
-    function openDay(item) {
+    function openDay(item, alreadyScratched) {
       currentModalItem = item;
-      const alreadyOpened = openedDays.includes(item.day);
 
       document.getElementById('modal-photo').src = item.image;
       document.getElementById('modal-date').textContent = item.day === 1 ? "1er décembre" : `${item.day} décembre`;
       document.getElementById('modal-text').textContent = item.text || "";
 
-      // Prepare the vinyl player (stays paused until scratch-off completes)
       prepareMusicPlayer(item);
 
-      const resetBtn = document.getElementById('test-reset-btn');
-      if (isPreview || isAdmin || params.get('testday')) {
-        resetBtn.classList.add('visible');
-      } else {
-        resetBtn.classList.remove('visible');
-      }
-
       document.getElementById('modal-backdrop').classList.add('active');
-      setupScratchCanvas(alreadyOpened);
+      setupScratchCanvas(alreadyScratched);
     }
 
     function closeModal() {
       const audio = document.getElementById('day-audio');
       audio.pause();
+      destroyYouTubePlayer();
       document.getElementById('embed-container').innerHTML = '';
       document.getElementById('vinyl-disc').classList.remove('spinning');
       document.getElementById('modal-backdrop').classList.remove('active');
