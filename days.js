@@ -11,8 +11,8 @@ const ADVENT_DAYS = [
   },
   {
     "day": 3,
-    "image": "day3.jpg",
-    "text": "Je repense encore à cette journée. Hâte de créer encore plus de souvenirs le 31 décembre."
+    "image": "day3.jpeg",
+    "text": "Meuf on mog trop sur la photo j'aime tellement t'es trop belle en plus \n😘❤️😘❤️"
   },
   {
     "day": 4,
