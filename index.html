@@ -641,21 +641,23 @@
       }
     }
 
-    // Unlock HTML5 Audio on first finger touch while scratching so autoplay works 100%
     function unlockAudioOnTouch() {
-      if (audioUnlockedByGesture || !currentModalItem || !currentModalItem.songFile) return;
-      const audio = document.getElementById('day-audio');
+      if (audioUnlockedByGesture || !currentModalItem) return;
       audioUnlockedByGesture = true;
-      audio.muted = true;
-      audio.play().then(() => {
-        if (!scratchCompleted) {
-          audio.pause();
-          audio.currentTime = 0;
-        }
-        audio.muted = false;
-      }).catch(() => {
-        audio.muted = false;
-      });
+
+      const audio = document.getElementById('day-audio');
+      if (currentModalItem.songFile && audio.src) {
+        audio.muted = true;
+        audio.play().then(() => {
+          if (!scratchCompleted) {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+          audio.muted = false;
+        }).catch(() => {
+          audio.muted = false;
+        });
+      }
     }
 
     function startRevealedMusic(item) {
@@ -667,23 +669,28 @@
 
       if (ytId) {
         if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+          ytPlayer.mute();
           ytPlayer.playVideo();
-          disc.classList.add('spinning');
-          playBtn.textContent = '❚❚';
+          setTimeout(() => {
+            if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+              ytPlayer.unMute();
+              ytPlayer.setVolume(100);
+            }
+          }, 300);
         } else {
-          // Fallback if YT API hadn't finished initializing
           const embedContainer = document.getElementById('embed-container');
           embedContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&playsinline=1&rel=0" height="150" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
           embedContainer.classList.add('visible');
-          disc.classList.add('spinning');
-          playBtn.textContent = '❚❚';
         }
       } else if (item.songFile) {
         audio.muted = false;
         audio.play().then(() => {
           disc.classList.add('spinning');
           playBtn.textContent = '❚❚';
-        }).catch(() => {});
+        }).catch(() => {
+          disc.classList.remove('spinning');
+          playBtn.textContent = '▶';
+        });
       }
     }
 
@@ -697,6 +704,7 @@
         if (state === YT.PlayerState.PLAYING) {
           ytPlayer.pauseVideo();
         } else {
+          ytPlayer.unMute();
           ytPlayer.playVideo();
         }
         return;
@@ -732,7 +740,6 @@
 
       if (alreadyScratched) {
         canvas.classList.add('revealed-foil');
-        // Wait briefly for YT player if needed, then start music
         setTimeout(() => startRevealedMusic(currentModalItem), 250);
         return;
       }
@@ -904,13 +911,11 @@
         const isTodayOrPreview = (item.day === maxDay) || isPreview || isAdmin;
 
         if (isPastDay) {
-          // Past days (e.g., Day 1 when on Day 2) are already scratched & visible
           tile.classList.add('opened');
           tile.style.backgroundImage = `url('${item.image}')`;
           tile.innerHTML = `<span class="tile-num">${item.day}</span>`;
           tile.onclick = () => openDay(item, true);
         } else if (isTodayOrPreview && item.day <= maxDay) {
-          // Today's square (and any square in preview/admin) always gets fresh scratch foil
           tile.classList.add('unlocked');
           tile.innerHTML = `<span class="tile-num">${item.day}</span><span class="tile-sub">Gratter ✨</span>`;
           tile.onclick = () => openDay(item, false);
