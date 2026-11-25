@@ -4,61 +4,124 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Un peu de patience...</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #fdfaf5;
-      --green: #1e352f;
-      --red: #8c2f39;
-      --gold: #d4af37;
-      --text-dark: #1c1c1c;
-      --text-light: #fdfaf5;
+      --bg-top: #0f1f1c;
+      --bg-mid: #1a2e2a;
+      --bg-bottom: #2c151b;
+      --card-glass: rgba(255, 250, 244, 0.08);
+      --card-border: rgba(232, 197, 116, 0.35);
+      --gold: #e8c574;
+      --gold-bright: #ffe5a3;
+      --crimson: #a62c3b;
+      --crimson-glow: rgba(196, 54, 72, 0.45);
+      --cream: #fdf8f0;
+      --text-dark: #23191a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg);
-      color: var(--text-dark);
+      background: radial-gradient(circle at top, #1f3d36 0%, var(--bg-top) 45%, var(--bg-bottom) 100%);
+      color: var(--cream);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 28px 16px 60px;
+      padding: 36px 16px 85px;
+      position: relative;
+      overflow-x: hidden;
     }
 
     body.revealed {
       justify-content: flex-start;
     }
 
-    header { text-align: center; max-width: 560px; margin-bottom: 22px; }
-    h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: var(--green); margin-bottom: 6px; }
-    .subtitle { font-size: 0.95rem; color: #555; line-height: 1.5; }
+    /* Falling Snowflakes Canvas */
+    #snow-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
 
+    header, .countdown-box, .grid, .admin-panel {
+      position: relative;
+      z-index: 2;
+    }
+
+    header { text-align: center; max-width: 580px; margin-bottom: 24px; }
+
+    .love-script {
+      font-family: 'Great Vibes', cursive;
+      font-size: 2.1rem;
+      color: var(--gold);
+      margin-bottom: 2px;
+      text-shadow: 0 2px 12px rgba(232, 197, 116, 0.35);
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.65rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 8px;
+      letter-spacing: 0.4px;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .subtitle {
+      font-size: 0.94rem;
+      color: rgba(253, 248, 240, 0.82);
+      line-height: 1.55;
+    }
+
+    /* Frosted Glass Countdown Card */
     .countdown-box {
-      background: var(--green);
-      color: var(--text-light);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(166, 44, 59, 0.18));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--cream);
       padding: 22px 28px;
-      border-radius: 16px;
-      margin-bottom: 28px;
+      border-radius: 20px;
+      margin-bottom: 30px;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(30, 53, 47, 0.15);
-      border: 1px solid rgba(212, 175, 55, 0.45);
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border: 1px solid var(--card-border);
       width: 100%;
       max-width: 580px;
     }
 
-    .countdown-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); margin-bottom: 8px; }
-    .countdown-timer { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 700; letter-spacing: 1px; }
+    .countdown-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      color: var(--gold);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
 
+    .countdown-timer {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.35rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(232, 197, 116, 0.3);
+    }
+
+    /* Advent Calendar Grid */
     .grid {
       display: none;
       grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
-      gap: 10px;
+      gap: 12px;
       width: 100%;
-      max-width: 660px;
+      max-width: 680px;
     }
 
     .grid.visible { display: grid; }
@@ -67,7 +130,7 @@
 
     .tile {
       aspect-ratio: 1 / 1;
-      border-radius: 12px;
+      border-radius: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -75,22 +138,100 @@
       position: relative;
       overflow: hidden;
       user-select: none;
-      transition: transform 0.25s ease;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
     }
 
-    .tile.locked { background: var(--green); color: rgba(255, 255, 255, 0.4); cursor: not-allowed; }
-    .tile.unlocked { background: var(--red); color: var(--text-light); border: 2px solid var(--gold); cursor: pointer; animation: pulse 2s infinite; }
-    .tile.unlocked:hover, .tile.opened:hover { transform: scale(1.05); }
-    .tile.opened { cursor: pointer; border: 2px solid var(--gold); background-size: cover; background-position: center; color: #fff; }
-    .tile.opened::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.28); }
+    /* Locked Pine Glass Tile */
+    .tile.locked {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(253, 248, 240, 0.38);
+      cursor: not-allowed;
+    }
 
-    .tile-num { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 700; position: relative; z-index: 1; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-    .tile-sub { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; position: relative; z-index: 1; }
+    /* Active Today Festive Crimson & Gold Tile */
+    .tile.unlocked {
+      background: linear-gradient(145deg, #b83344, #7a1c28);
+      color: var(--cream);
+      border: 2px solid var(--gold);
+      cursor: pointer;
+      animation: festiveGlow 2.4s infinite;
+    }
 
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.55); }
-      70% { box-shadow: 0 0 0 9px rgba(212, 175, 55, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+    .tile.unlocked:hover, .tile.opened:hover {
+      transform: translateY(-3px) scale(1.04);
+    }
+
+    /* Already Revealed Photo Tile */
+    .tile.opened {
+      cursor: pointer;
+      border: 2px solid var(--gold);
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .tile.opened::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(20, 10, 12, 0.55), rgba(0, 0, 0, 0.12));
+    }
+
+    .tile-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+    }
+
+    .tile-sub {
+      font-size: 0.64rem;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      margin-top: 2px;
+      position: relative;
+      z-index: 1;
+      color: var(--gold-bright);
+    }
+
+    @keyframes festiveGlow {
+      0% { box-shadow: 0 0 0 0 rgba(232, 197, 116, 0.6); }
+      70% { box-shadow: 0 0 0 11px rgba(232, 197, 116, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(232, 197, 116, 0); }
+    }
+
+    /* Floating Ambient Christmas Music Box Toggle */
+    .ambient-music-btn {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 50;
+      background: rgba(24, 42, 38, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--gold-bright);
+      border: 1px solid var(--gold);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .ambient-music-btn:hover {
+      transform: scale(1.04);
+      background: rgba(166, 44, 59, 0.9);
     }
 
     /* Admin Upload Panel (?admin=true) */
@@ -98,50 +239,60 @@
       display: none;
       width: 100%;
       max-width: 580px;
-      background: #fff;
-      border: 2px solid var(--green);
-      border-radius: 16px;
+      background: var(--cream);
+      color: var(--text-dark);
+      border: 2px solid var(--gold);
+      border-radius: 20px;
       padding: 22px;
       margin-bottom: 28px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
     }
     .admin-panel.visible { display: block; }
-    .admin-panel h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--green); margin-bottom: 12px; }
+    .admin-panel h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.65rem; color: #1a2e2a; margin-bottom: 12px; }
     .admin-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .admin-field { margin-bottom: 12px; }
     .admin-field label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px; color: #333; }
     .admin-field input, .admin-field select, .admin-field textarea {
-      width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.92rem;
+      width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #d4c8b8; font-family: inherit; font-size: 0.92rem; background: #fff;
     }
     .admin-hint { font-size: 0.74rem; color: #666; margin-top: 3px; }
     .admin-btn {
-      background: var(--green); color: #fff; border: none; padding: 12px; border-radius: 8px;
+      background: linear-gradient(135deg, #1f3d36, #142924); color: var(--gold-bright); border: 1px solid var(--gold); padding: 12px; border-radius: 10px;
       width: 100%; font-weight: 600; cursor: pointer; font-size: 0.95rem;
     }
     .admin-btn:disabled { opacity: 0.6; cursor: wait; }
     .admin-status { margin-top: 10px; font-size: 0.85rem; font-weight: 500; text-align: center; }
 
-    /* Modal & Scratch-off Canvas */
+    /* Romantic Memory Modal */
     .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78);
+      position: fixed; inset: 0; background: rgba(8, 15, 14, 0.82);
+      backdrop-filter: blur(6px);
       display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100;
     }
     .modal-backdrop.active { display: flex; }
     .modal {
-      background: var(--bg); max-width: 440px; width: 100%; border-radius: 20px; overflow: hidden;
-      position: relative; box-shadow: 0 24px 48px rgba(0,0,0,0.35); border: 2px solid var(--gold);
-      max-height: 92vh; overflow-y: auto;
+      background: var(--cream);
+      color: var(--text-dark);
+      max-width: 440px;
+      width: 100%;
+      border-radius: 22px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.55);
+      border: 2px solid var(--gold);
+      max-height: 92vh;
+      overflow-y: auto;
     }
     .close-btn {
-      position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
-      background: rgba(0, 0, 0, 0.65); color: #fff; border: none; font-size: 1.3rem; cursor: pointer; z-index: 10;
+      position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(20, 15, 16, 0.72); color: var(--cream); border: 1px solid rgba(232, 197, 116, 0.5); font-size: 1.3rem; cursor: pointer; z-index: 10;
     }
 
     .scratch-container {
       position: relative;
       width: 100%;
       height: 340px;
-      background: #e9e4db;
+      background: #e9e0d2;
       overflow: hidden;
       user-select: none;
     }
@@ -160,7 +311,7 @@
       height: 100%;
       cursor: grab;
       touch-action: none;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.65s ease;
       z-index: 3;
     }
 
@@ -169,8 +320,8 @@
       pointer-events: none;
     }
 
-    .modal-body { padding: 20px 22px 24px; text-align: center; }
-    .modal-date { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: var(--red); margin-bottom: 12px; }
+    .modal-body { padding: 20px 24px 26px; text-align: center; }
+    .modal-date { font-family: 'Cormorant Garamond', serif; font-size: 1.95rem; color: var(--crimson); margin-bottom: 12px; }
 
     /* Instagram-Style Spinning Vinyl Player */
     .vinyl-wrapper {
@@ -178,11 +329,11 @@
       flex-direction: column;
       gap: 10px;
       background: #fff;
-      border: 1px solid rgba(212, 175, 55, 0.5);
+      border: 1px solid rgba(212, 175, 55, 0.55);
       border-radius: 14px;
       padding: 12px 14px;
       margin-bottom: 14px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
       text-align: left;
     }
     .vinyl-wrapper.visible { display: flex; }
@@ -208,7 +359,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       position: relative;
       animation: spinVinyl 4s linear infinite;
       animation-play-state: paused;
@@ -230,7 +381,7 @@
       position: absolute;
       width: 5px;
       height: 5px;
-      background: #fdfaf5;
+      background: var(--cream);
       border-radius: 50%;
     }
 
@@ -240,7 +391,7 @@
     }
 
     .song-info { flex: 1; min-width: 0; }
-    .song-badge { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); font-weight: 700; }
+    .song-badge { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #b5892e; font-weight: 700; }
     .song-title { font-size: 0.92rem; font-weight: 600; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .song-artist { font-size: 0.78rem; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -249,7 +400,7 @@
       height: 38px;
       border-radius: 50%;
       border: none;
-      background: var(--red);
+      background: var(--crimson);
       color: #fff;
       font-size: 0.95rem;
       cursor: pointer;
@@ -268,12 +419,16 @@
     .embed-container.visible { display: block; }
     .embed-container iframe { width: 100%; border: none; display: block; }
 
-    .modal-text { font-size: 1rem; line-height: 1.65; color: #2b2b2b; }
+    .modal-text { font-size: 1.02rem; line-height: 1.65; color: #2b2122; }
   </style>
 </head>
 <body>
 
+  <!-- Gentle Falling Snowflakes -->
+  <canvas id="snow-canvas"></canvas>
+
   <header>
+    <div class="love-script">Pour toi, mon amour</div>
     <h1 id="main-title">Un peu de patience...</h1>
     <p class="subtitle" id="main-subtitle">Une surprise t'attend ici dès le 1er décembre à minuit (heure du Vietnam).</p>
   </header>
@@ -327,6 +482,12 @@
 
   <div class="grid" id="calendar-grid"></div>
 
+  <!-- Floating Christmas Music Box Button -->
+  <button class="ambient-music-btn" id="ambient-btn" onclick="toggleAmbientMusic()">
+    <span id="ambient-icon">🎄</span>
+    <span id="ambient-label">Musique de Noël : Off</span>
+  </button>
+
   <!-- Modal with Scratch-off & Vinyl Player -->
   <div class="modal-backdrop" id="modal-backdrop" onclick="if(event.target === this) closeModal()">
     <div class="modal">
@@ -363,11 +524,132 @@
     </div>
   </div>
 
-  <!-- YouTube IFrame Player API for reliable autoplay after scratch -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="days.js"></script>
 
   <script>
+    // =========================================================================
+    // GENTLE WINTER SNOWFALL ANIMATION
+    // =========================================================================
+    (function initSnow() {
+      const canvas = document.getElementById('snow-canvas');
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const flakes = Array.from({ length: 55 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 2.8 + 1,
+        speedY: Math.random() * 0.7 + 0.3,
+        drift: Math.random() * 0.5 - 0.25,
+        opacity: Math.random() * 0.55 + 0.2
+      }));
+
+      function drawSnow() {
+        ctx.clearRect(0, 0, width, height);
+        flakes.forEach(f => {
+          ctx.beginPath();
+          ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 250, 240, ${f.opacity})`;
+          ctx.fill();
+
+          f.y += f.speedY;
+          f.x += f.drift + Math.sin(f.y * 0.01) * 0.25;
+
+          if (f.y > height) { f.y = -5; f.x = Math.random() * width; }
+          if (f.x > width) f.x = 0;
+          if (f.x < 0) f.x = width;
+        });
+        requestAnimationFrame(drawSnow);
+      }
+      drawSnow();
+    })();
+
+    // =========================================================================
+    // BUILT-IN ROMANTIC CHRISTMAS MUSIC BOX (Web Audio Synthesizer)
+    // =========================================================================
+    let audioCtx = null;
+    let ambientPlaying = false;
+    let ambientPausedForModal = false;
+    let melodyTimer = null;
+    let noteIndex = 0;
+
+    // Gentle music-box notes for "We Wish You a Merry Christmas" (freq in Hz, duration in ms)
+    const XMAS_MELODY = [
+      [261.63, 420], [349.23, 420], [349.23, 210], [392.00, 210], [349.23, 210], [329.63, 210],
+      [293.66, 420], [293.66, 420], [293.66, 420], [392.00, 420], [392.00, 210], [440.00, 210],
+      [392.00, 210], [349.23, 210], [329.63, 420], [261.63, 420], [261.63, 420], [440.00, 420],
+      [440.00, 210], [493.88, 210], [440.00, 210], [392.00, 210], [349.23, 420], [293.66, 420],
+      [261.63, 210], [261.63, 210], [293.66, 420], [392.00, 420], [329.63, 420], [349.23, 850]
+    ];
+
+    function playMusicBoxNote(freq, duration) {
+      if (!audioCtx || !ambientPlaying) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(0.055, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + (duration / 1000) * 1.4);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + (duration / 1000) * 1.45);
+    }
+
+    function scheduleNextNote() {
+      if (!ambientPlaying) return;
+      const [freq, dur] = XMAS_MELODY[noteIndex % XMAS_MELODY.length];
+      playMusicBoxNote(freq, dur);
+      noteIndex++;
+      melodyTimer = setTimeout(scheduleNextNote, dur);
+    }
+
+    function updateAmbientButtonUI() {
+      const label = document.getElementById('ambient-label');
+      const icon = document.getElementById('ambient-icon');
+      if (ambientPlaying) {
+        icon.textContent = '🎶';
+        label.textContent = 'Musique de Noël : On';
+      } else {
+        icon.textContent = '🎄';
+        label.textContent = 'Musique de Noël : Off';
+      }
+    }
+
+    function toggleAmbientMusic() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (ambientPlaying) {
+        ambientPlaying = false;
+        clearTimeout(melodyTimer);
+      } else {
+        ambientPlaying = true;
+        scheduleNextNote();
+      }
+      updateAmbientButtonUI();
+    }
+
+    // =========================================================================
+    // MAIN CALENDAR & ADMIN LOGIC
+    // =========================================================================
     const TARGET_YEAR = 2026;
     const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
     const params = new URLSearchParams(window.location.search);
@@ -383,9 +665,6 @@
       ytApiReady = true;
     }
 
-    // =========================================================================
-    // ADMIN UPLOADER LOGIC
-    // =========================================================================
     if (isAdmin) {
       document.getElementById('admin-panel').classList.add('visible');
       const savedToken = localStorage.getItem('gh_advent_token');
@@ -483,7 +762,7 @@
       }
 
       btn.disabled = true;
-      statusEl.style.color = "#1e352f";
+      statusEl.style.color = "#1a2e2a";
 
       try {
         const existingEntry = ADVENT_DAYS.find(d => d.day === day) || {};
@@ -544,7 +823,7 @@
         fileInput.value = "";
         audioInput.value = "";
       } catch (err) {
-        statusEl.style.color = "#8c2f39";
+        statusEl.style.color = "#a62c3b";
         statusEl.textContent = `❌ ${err.message}`;
       } finally {
         btn.disabled = false;
@@ -595,6 +874,14 @@
       if (!hasSong) {
         vinylWrapper.classList.remove('visible');
         return;
+      }
+
+      // Pause ambient Christmas music box while daily song modal is open
+      if (ambientPlaying) {
+        ambientPausedForModal = true;
+        ambientPlaying = false;
+        clearTimeout(melodyTimer);
+        updateAmbientButtonUI();
       }
 
       vinylWrapper.classList.add('visible');
@@ -726,7 +1013,7 @@
     }
 
     // =========================================================================
-    // SCRATCH-OFF FOIL ENGINE (Re-scratches today's tile; past days pre-opened)
+    // SCRATCH-OFF FOIL ENGINE
     // =========================================================================
     let isDrawing = false;
     let scratchCompleted = false;
@@ -750,15 +1037,15 @@
 
       const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
       grad.addColorStop(0, '#c89d28');
-      grad.addColorStop(0.3, '#f3db82');
+      grad.addColorStop(0.3, '#f7e396');
       grad.addColorStop(0.6, '#d4af37');
-      grad.addColorStop(1, '#aa8018');
+      grad.addColorStop(1, '#9e7414');
 
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = 'rgba(30, 53, 47, 0.85)';
+      ctx.fillStyle = 'rgba(26, 46, 42, 0.9)';
       ctx.font = '600 18px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('✨ Gratte ici avec ton doigt ✨', canvas.width / 2, canvas.height / 2 - 6);
@@ -857,8 +1144,8 @@
         document.body.classList.add('revealed');
         grid.classList.add('visible');
         document.title = "31 jours avant le 31 décembre";
-        titleEl.textContent = "31 jours avant le 31 décembre";
-        subtitleEl.textContent = "Un nouveau souvenir se débloque chaque jour à minuit (heure du Vietnam) jusqu'à nos retrouvailles.";
+        titleEl.textContent = "31 jours avant nos retrouvailles";
+        subtitleEl.textContent = "Un nouveau souvenir se débloque chaque jour à minuit (heure du Vietnam) jusqu'au 31 décembre.";
       } else {
         document.body.classList.remove('revealed');
         grid.classList.remove('visible');
@@ -872,7 +1159,7 @@
 
       if (vnNow < dec1) {
         targetDate = dec1;
-        label = "Ouverture dans";
+        label = "✨ Ouverture dans ✨";
       } else if (vnNow < dec31) {
         targetDate = new Date(vnNow.getFullYear(), vnNow.getMonth(), vnNow.getDate() + 1, 0, 0, 0);
         const daysLeft = Math.ceil((dec31 - vnNow) / (1000 * 60 * 60 * 24));
@@ -948,6 +1235,14 @@
       document.getElementById('embed-container').innerHTML = '';
       document.getElementById('vinyl-disc').classList.remove('spinning');
       document.getElementById('modal-backdrop').classList.remove('active');
+
+      // Resume Christmas music box if it was playing before opening the popup
+      if (ambientPausedForModal) {
+        ambientPausedForModal = false;
+        ambientPlaying = true;
+        updateAmbientButtonUI();
+        scheduleNextNote();
+      }
     }
 
     updateViewAndCountdown();
