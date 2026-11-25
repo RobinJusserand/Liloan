@@ -2,7 +2,10 @@ const ADVENT_DAYS = [
   {
     "day": 1,
     "image": "day1.jpeg",
-    "text": "Jour 1 : Là où tout a commencé. Plus que 30 jours avant de te retrouver !"
+    "text": "Jour 1 : Là où tout a commencé. Plus que 30 jours avant de te voir my baby !",
+    "songUrl": "https://open.spotify.com/track/78oIDxTChs1EJrQwUc931r?si=9e0ceca1cd8643fc",
+    "songTitle": "It's Just Us",
+    "songArtist": "Kali Uchis"
   },
   {
     "day": 2,
