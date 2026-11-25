@@ -112,39 +112,28 @@
       text-shadow: 0 2px 10px rgba(232, 197, 116, 0.3);
     }
 
-    /* Pre-December 1st Teaser Box */
+    /* Pre-December 1st Snowglobe Hint */
     .teaser-box {
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
       margin-bottom: 24px;
     }
     .teaser-box.visible { display: flex; }
 
-    .teaser-btn {
-      background: linear-gradient(135deg, #b83344, #7a1c28);
-      color: var(--cream);
-      border: 1.5px solid var(--gold);
-      padding: 13px 24px;
-      border-radius: 999px;
-      font-family: inherit;
-      font-size: 0.92rem;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(166, 44, 59, 0.45);
-      transition: transform 0.2s ease;
-    }
-    .teaser-btn:hover { transform: scale(1.04); }
-
     .snowglobe-hint {
-      font-size: 0.78rem;
-      color: rgba(253, 248, 240, 0.75);
+      font-size: 0.8rem;
+      color: rgba(253, 248, 240, 0.8);
       cursor: pointer;
-      background: rgba(255, 255, 255, 0.07);
-      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 8px 16px;
       border-radius: 999px;
-      border: 1px solid rgba(232, 197, 116, 0.25);
+      border: 1px solid rgba(232, 197, 116, 0.3);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .snowglobe-hint:hover {
+      transform: scale(1.04);
+      background: rgba(255, 255, 255, 0.14);
     }
 
     /* Advent Calendar Grid */
@@ -369,7 +358,6 @@
     }
     .vinyl-wrapper.visible { display: flex; }
 
-    /* Sealed Envelope Overlay specifically for the Song */
     .music-envelope-overlay {
       position: absolute;
       inset: 0;
@@ -524,7 +512,7 @@
       <input type="password" id="gh-token" placeholder="Colle ton token github_pat_..." />
     </div>
     <div class="admin-field">
-      <label>Choisir le jour (0 = Avant-goût, 1 à 31)</label>
+      <label>Choisir le jour (1 à 31)</label>
       <select id="admin-day"></select>
     </div>
     <div class="admin-field">
@@ -563,9 +551,8 @@
     <div class="countdown-timer" id="countdown-timer">--j --h --m --s</div>
   </div>
 
-  <!-- Pre-December 1st Teaser -->
+  <!-- Pre-December 1st Snowglobe Hint -->
   <div class="teaser-box" id="teaser-box">
-    <button class="teaser-btn" onclick="openTeaserDay()">💌 Ouvrir l'avant-goût (Jour 0)</button>
     <div class="snowglobe-hint" onclick="swirlSnow()">❄️ Touche l'écran pour secouer la boule à neige</div>
   </div>
 
@@ -789,10 +776,10 @@
       if (savedToken) document.getElementById('gh-token').value = savedToken;
 
       const daySelect = document.getElementById('admin-day');
-      for (let i = 0; i <= 31; i++) {
+      for (let i = 1; i <= 31; i++) {
         const opt = document.createElement('option');
         opt.value = i;
-        opt.textContent = i === 0 ? 'Jour 0 (Avant-goût avant le 1er déc.)' : (i === 1 ? '1er décembre' : `${i} décembre`);
+        opt.textContent = i === 1 ? '1er décembre' : `${i} décembre`;
         daySelect.appendChild(opt);
       }
       daySelect.addEventListener('change', prefillAdminFields);
@@ -1070,7 +1057,6 @@
       }
     }
 
-    // Explicit tap on the Music Envelope -> guaranteed user gesture to start playback!
     function unsealMusicEnvelope() {
       const musicEnvelope = document.getElementById('music-envelope');
       musicEnvelope.classList.add('unsealed');
@@ -1088,7 +1074,6 @@
       const isSpotify = item.songUrl && item.songUrl.includes('open.spotify.com');
 
       if (isSpotify) {
-        // Spotify embeds always require tapping inside the widget, so unseal smoothly
         musicEnvelope.classList.add('unsealed');
         return;
       }
@@ -1103,7 +1088,6 @@
               ytPlayer.unMute();
               ytPlayer.setVolume(100);
             }
-            // If browser blocked auto-start after scratch, keep envelope ready for 1 tap
             if (ytPlayer.getPlayerState && ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
               envelopeSub.textContent = "Touche le sceau ♥ pour lancer la musique";
             } else {
@@ -1123,7 +1107,6 @@
           disc.classList.add('spinning');
           playBtn.textContent = '❚❚';
         }).catch(() => {
-          // Keep envelope sealed as a tap target if mobile Safari blocked scratch-triggered audio
           disc.classList.remove('spinning');
           playBtn.textContent = '▶';
           envelopeSub.textContent = "Touche le sceau ♥ pour lancer la musique";
@@ -1257,7 +1240,7 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
 
     // =========================================================================
-    // SURPRISE MODE, PRE-DEC 1 TEASER & VIETNAM COUNTDOWN ENGINE
+    // SURPRISE MODE & VIETNAM COUNTDOWN ENGINE
     // =========================================================================
     function getVietnamNow() {
       const testDay = Number(params.get('testday'));
@@ -1368,23 +1351,11 @@
       });
     }
 
-    function openTeaserDay() {
-      const data = typeof ADVENT_DAYS !== 'undefined' ? ADVENT_DAYS : [];
-      const day0 = data.find(d => d.day === 0) || data[0] || {
-        day: 0,
-        image: 'day1.jpg',
-        text: "Encore un tout petit peu de patience mon cœur... Le vrai calendrier commence le 1er décembre à minuit ! ❤️"
-      };
-      openDay(day0, false);
-    }
-
     function openDay(item, alreadyScratched) {
       currentModalItem = item;
 
       document.getElementById('modal-photo').src = item.image;
-      document.getElementById('modal-date').textContent = item.day === 0
-        ? "Avant-goût ✨"
-        : (item.day === 1 ? "1er décembre" : `${item.day} décembre`);
+      document.getElementById('modal-date').textContent = item.day === 1 ? "1er décembre" : `${item.day} décembre`;
       document.getElementById('modal-text').textContent = item.text || "";
 
       prepareMusicPlayer(item);
