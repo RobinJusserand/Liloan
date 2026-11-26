@@ -609,7 +609,9 @@
   </div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="days.js"></script>
+  <script>
+    document.write('<script src="days.js?v=' + Date.now() + '"><\/script>');
+  </script>
 
   <script>
     // =========================================================================
