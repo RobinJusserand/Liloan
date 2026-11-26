@@ -2,7 +2,7 @@ const ADVENT_DAYS = [
   {
     "day": 1,
     "image": "day1.jpeg",
-    "text": "Jour 1 : Là où tout a commencé. Plus que 30 jours avant de te voir my baby !",
+    "text": "Jour 1 : Le 28 Octobre !!!!! Ce jour où tout a commencé. Ravi de pouvoir t'appeler la mienne! Plus que 30 jours avant de te voir my baby! Je t'aime fort <33",
     "songUrl": "https://open.spotify.com/track/78oIDxTChs1EJrQwUc931r?si=9e0ceca1cd8643fc",
     "songTitle": "It's Just Us",
     "songArtist": "Kali Uchis"
@@ -10,10 +10,7 @@ const ADVENT_DAYS = [
   {
     "day": 2,
     "image": "day2.jpeg",
-    "text": "Une de mes photos préférées de toi. Tu sais pas manger et j'ai gardé la photo MDRRRRRR. T'es toute belle quand meme :)",
-    "songUrl": "https://open.spotify.com/track/7ujxY1bqVRvMe1sR5iFmxt?si=e1e35a8975df4db2",
-    "songTitle": "Ailleurs",
-    "songArtist": "Josman"
+    "text": "Une de mes photos préférées de toi. Tu sais pas manger et j'ai gardé la photo MDRRRRRR"
   },
   {
     "day": 3,
